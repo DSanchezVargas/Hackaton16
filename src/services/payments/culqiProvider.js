@@ -30,7 +30,7 @@ async function createCulqiPayment({ amountCents, currency, token }) {
     amount: amountCents,
     currency_code: currency,
     source_id: token,
-    description: 'Hackaton16 online payment',
+    description: 'Hackathon16 online payment',
     email: 'customer@example.com',
   });
 

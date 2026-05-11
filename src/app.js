@@ -1,5 +1,7 @@
 const express = require('express');
 const session = require('express-session');
+const csrf = require('@dr.pogodin/csurf');
+const rateLimit = require('express-rate-limit');
 const http = require('http');
 const { Server } = require('socket.io');
 const { env } = require('./config/env');
@@ -29,14 +31,29 @@ function createApp() {
   const io = new Server(server, {
     cors: { origin: '*' },
   });
+  const authLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 40,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  const apiLimiter = rateLimit({
+    windowMs: 10 * 60 * 1000,
+    max: 200,
+    standardHeaders: true,
+    legacyHeaders: false,
+  });
+  const csrfProtection = csrf();
 
   app.use(express.json());
+  app.set('trust proxy', 1);
   app.use(
     session({
       secret: env.sessionSecret,
       resave: false,
       saveUninitialized: false,
       cookie: {
+        secure: true,
         httpOnly: true,
         sameSite: 'lax',
       },
@@ -45,6 +62,9 @@ function createApp() {
 
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use('/auth', authLimiter);
+  app.use('/api', apiLimiter);
+  app.use('/api', csrfProtection);
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
@@ -103,6 +123,10 @@ function createApp() {
     } catch (error) {
       return res.status(500).json(toHttpError(error));
     }
+  });
+
+  app.get('/api/csrf-token', requireAuth, (req, res) => {
+    res.json({ csrfToken: req.csrfToken() });
   });
 
   app.post('/api/payments', requireAuth, async (req, res) => {
@@ -203,6 +227,13 @@ function createApp() {
     } catch (error) {
       return res.status(500).json(toHttpError(error));
     }
+  });
+
+  app.use((error, _req, res, next) => {
+    if (error.code === 'EBADCSRFTOKEN') {
+      return res.status(403).json({ error: 'Invalid CSRF token' });
+    }
+    return next(error);
   });
 
   return { app, server };

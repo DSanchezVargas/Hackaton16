@@ -10,7 +10,7 @@ const env = {
     port: Number(process.env.MYSQL_PORT || 3306),
     user: process.env.MYSQL_USER || 'root',
     password: process.env.MYSQL_PASSWORD || '',
-    database: process.env.MYSQL_DATABASE || 'hackaton16',
+    database: process.env.MYSQL_DATABASE || 'hackathon16',
   },
   github: {
     clientID: process.env.GITHUB_CLIENT_ID || '',

@@ -1,5 +1,5 @@
 {
-  "name": "hackaton16",
+  "name": "hackathon16",
   "version": "1.0.0",
   "description": "Sistema de pagos online con Express, MySQL, OAuth, Socket.IO, Stripe y Culqi",
   "main": "src/server.js",
@@ -30,8 +30,10 @@
   },
   "homepage": "https://github.com/DSanchezVargas/Hackaton16#readme",
   "dependencies": {
+    "@dr.pogodin/csurf": "^1.16.9",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "express-rate-limit": "^8.5.1",
     "express-session": "^1.18.2",
     "mysql2": "^3.15.3",
     "passport": "^0.7.0",

@@ -1,4 +1,4 @@
-# Hackaton16 - Sistema de Pagos Online
+# Hackathon16 - Sistema de Pagos Online
 
 Backend con **Express + Node.js + Socket.IO + MySQL + OAuth (GitHub) + Stripe + Culqi** para registrar productos, pagos y devoluciones persistentes.
 
