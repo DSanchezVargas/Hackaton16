@@ -7,13 +7,19 @@ const {
   createCulqiRefund,
 } = require('./culqiProvider');
 
-async function createExternalPayment({ provider, amountCents, currency, token }) {
+async function createExternalPayment({
+  provider,
+  amountCents,
+  currency,
+  token,
+  email,
+}) {
   if (provider === 'stripe') {
     return createStripePayment({ amountCents, currency, token });
   }
 
   if (provider === 'culqi') {
-    return createCulqiPayment({ amountCents, currency, token });
+    return createCulqiPayment({ amountCents, currency, token, email });
   }
 
   throw new Error('Unsupported payment provider');

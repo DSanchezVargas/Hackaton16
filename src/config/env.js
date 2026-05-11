@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const env = {
+  nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 3000),
   sessionSecret: process.env.SESSION_SECRET || 'dev-secret',
   mysql: {
@@ -23,6 +24,10 @@ const env = {
   stripeSecretKey: process.env.STRIPE_SECRET_KEY || '',
   culqiSecretKey: process.env.CULQI_SECRET_KEY || '',
   culqiApiUrl: process.env.CULQI_API_URL || 'https://api.culqi.com/v2',
+  socketCorsOrigins: (process.env.SOCKET_CORS_ORIGINS || 'http://localhost:3000')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean),
   enableDevAuth: String(process.env.ENABLE_DEV_AUTH || 'false') === 'true',
 };
 

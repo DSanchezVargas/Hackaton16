@@ -1,11 +1,10 @@
 const express = require('express');
-const session = require('express-session');
-const csrf = require('@dr.pogodin/csurf');
 const rateLimit = require('express-rate-limit');
 const http = require('http');
 const { Server } = require('socket.io');
 const { env } = require('./config/env');
 const { passport } = require('./auth/passport');
+const { signToken } = require('./auth/token');
 const { requireAuth } = require('./middleware/auth');
 const {
   createProduct,
@@ -29,7 +28,7 @@ function createApp() {
   const app = express();
   const server = http.createServer(app);
   const io = new Server(server, {
-    cors: { origin: '*' },
+    cors: { origin: env.socketCorsOrigins },
   });
   const authLimiter = rateLimit({
     windowMs: 10 * 60 * 1000,
@@ -43,28 +42,12 @@ function createApp() {
     standardHeaders: true,
     legacyHeaders: false,
   });
-  const csrfProtection = csrf();
 
   app.use(express.json());
   app.set('trust proxy', 1);
-  app.use(
-    session({
-      secret: env.sessionSecret,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: true,
-        httpOnly: true,
-        sameSite: 'lax',
-      },
-    })
-  );
-
   app.use(passport.initialize());
-  app.use(passport.session());
   app.use('/auth', authLimiter);
   app.use('/api', apiLimiter);
-  app.use('/api', csrfProtection);
 
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
@@ -74,7 +57,10 @@ function createApp() {
     if (!env.github.clientID || !env.github.clientSecret) {
       return res.status(503).json({ error: 'GitHub OAuth is not configured' });
     }
-    return passport.authenticate('github', { scope: ['user:email'] })(
+    return passport.authenticate('github', {
+      scope: ['user:email'],
+      session: false,
+    })(
       req,
       res,
       next
@@ -83,9 +69,17 @@ function createApp() {
 
   app.get(
     '/auth/github/callback',
-    passport.authenticate('github', { failureRedirect: '/auth/failure' }),
-    (_req, res) => {
-      res.redirect(env.frontendSuccessUrl);
+    passport.authenticate('github', {
+      failureRedirect: '/auth/failure',
+      session: false,
+    }),
+    (req, res) => {
+      const token = signToken(req.user);
+      if (env.frontendSuccessUrl) {
+        const separator = env.frontendSuccessUrl.includes('?') ? '&' : '?';
+        return res.redirect(`${env.frontendSuccessUrl}${separator}token=${token}`);
+      }
+      return res.json({ token, user: req.user });
     }
   );
 
@@ -125,13 +119,9 @@ function createApp() {
     }
   });
 
-  app.get('/api/csrf-token', requireAuth, (req, res) => {
-    res.json({ csrfToken: req.csrfToken() });
-  });
-
   app.post('/api/payments', requireAuth, async (req, res) => {
     try {
-      const { productId, quantity, provider, token } = req.body;
+      const { productId, quantity, provider, token, email } = req.body;
 
       if (
         !Number.isInteger(productId) ||
@@ -153,6 +143,7 @@ function createApp() {
         amountCents,
         currency: product.currency,
         token,
+        email,
       });
 
       const payment = await createPayment({
@@ -227,13 +218,6 @@ function createApp() {
     } catch (error) {
       return res.status(500).json(toHttpError(error));
     }
-  });
-
-  app.use((error, _req, res, next) => {
-    if (error.code === 'EBADCSRFTOKEN') {
-      return res.status(403).json({ error: 'Invalid CSRF token' });
-    }
-    return next(error);
   });
 
   return { app, server };

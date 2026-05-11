@@ -13,3 +13,10 @@ test('calculateAmountCents validates price', () => {
 test('calculateAmountCents validates quantity', () => {
   assert.throws(() => calculateAmountCents(1000, 0), /Invalid quantity/);
 });
+
+test('calculateAmountCents stays within safe integer range', () => {
+  assert.throws(
+    () => calculateAmountCents(1000000000, 1000000000),
+    /safe integer range/
+  );
+});

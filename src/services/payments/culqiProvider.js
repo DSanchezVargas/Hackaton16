@@ -11,17 +11,16 @@ async function culqiRequest(path, payload) {
   });
 
   if (!response.ok) {
-    const errorBody = await response.text();
-    throw new Error(`Culqi API error: ${response.status} ${errorBody}`);
+    throw new Error(`Culqi API error: ${response.status}`);
   }
 
   return response.json();
 }
 
-async function createCulqiPayment({ amountCents, currency, token }) {
+async function createCulqiPayment({ amountCents, currency, token, email }) {
   if (!env.culqiSecretKey) {
     return {
-      providerPaymentId: `culqi_sim_${Date.now()}`,
+      providerPaymentId: `test_culqi_${Date.now()}`,
       status: 'simulated',
     };
   }
@@ -31,7 +30,7 @@ async function createCulqiPayment({ amountCents, currency, token }) {
     currency_code: currency,
     source_id: token,
     description: 'Hackathon16 online payment',
-    email: 'customer@example.com',
+    email: email || 'customer@example.com',
   });
 
   return {
@@ -43,7 +42,7 @@ async function createCulqiPayment({ amountCents, currency, token }) {
 async function createCulqiRefund({ providerPaymentId, amountCents, reason }) {
   if (!env.culqiSecretKey) {
     return {
-      providerRefundId: `culqi_ref_sim_${Date.now()}`,
+      providerRefundId: `test_culqi_ref_${Date.now()}`,
       status: 'simulated',
     };
   }

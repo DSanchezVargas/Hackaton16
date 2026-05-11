@@ -46,7 +46,9 @@ npm start
 
 - Configurar `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` y `GITHUB_CALLBACK_URL`.
 - Flujo: `GET /auth/github` → callback `GET /auth/github/callback`.
+- El callback devuelve/propaga un token Bearer firmado para consumir `/api/*`.
 - Desarrollo local rápido: `ENABLE_DEV_AUTH=true` y enviar `x-dev-user-id`.
+- **Nunca** habilitar `ENABLE_DEV_AUTH=true` en producción.
 
 ## Endpoints principales
 
@@ -64,3 +66,9 @@ Eventos emitidos:
 
 - `payment:created`
 - `refund:created`
+
+## Seguridad básica incluida
+
+- Token Bearer firmado (HMAC SHA-256) para endpoints protegidos
+- Rate limiting para `/auth` y `/api`
+- CORS de Socket.IO restringido por `SOCKET_CORS_ORIGINS`

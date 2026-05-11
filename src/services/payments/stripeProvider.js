@@ -8,7 +8,7 @@ const stripeClient = env.stripeSecretKey
 async function createStripePayment({ amountCents, currency, token }) {
   if (!stripeClient) {
     return {
-      providerPaymentId: `stripe_sim_${Date.now()}`,
+      providerPaymentId: `test_stripe_${Date.now()}`,
       status: 'simulated',
     };
   }
@@ -33,7 +33,7 @@ async function createStripePayment({ amountCents, currency, token }) {
 async function createStripeRefund({ providerPaymentId }) {
   if (!stripeClient) {
     return {
-      providerRefundId: `stripe_ref_sim_${Date.now()}`,
+      providerRefundId: `test_stripe_ref_${Date.now()}`,
       status: 'simulated',
     };
   }
