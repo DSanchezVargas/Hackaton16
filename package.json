@@ -1,0 +1,42 @@
+{
+  "name": "hackaton16",
+  "version": "1.0.0",
+  "description": "Sistema de pagos online con Express, MySQL, OAuth, Socket.IO, Stripe y Culqi",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "lint": "bash -c 'find src -name \"*.js\" -print0 | xargs -0 -r node --check'",
+    "build": "echo \"No build step required\"",
+    "test": "node --test",
+    "db:init": "node src/db/initSchema.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DSanchezVargas/Hackaton16.git"
+  },
+  "keywords": [
+    "express",
+    "mysql",
+    "oauth",
+    "socket.io",
+    "stripe",
+    "culqi"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/DSanchezVargas/Hackaton16/issues"
+  },
+  "homepage": "https://github.com/DSanchezVargas/Hackaton16#readme",
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-session": "^1.18.2",
+    "mysql2": "^3.15.3",
+    "passport": "^0.7.0",
+    "passport-github2": "^0.1.12",
+    "socket.io": "^4.8.1",
+    "stripe": "^18.5.0"
+  }
+}
